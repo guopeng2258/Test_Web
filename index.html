@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>炫酷特效首页</title>
+    <style>
+        /* 全局样式 */
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #1a1a1a;
+            color: white;
+            font-family: 'Arial', sans-serif;
+        }
+
+        /* 导航栏 */
+        .nav {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            display: flex;
+            gap: 30px;
+            z-index: 999;
+        }
+        .nav a {
+            text-decoration: none;
+            color: white;
+            font-size: 16px;
+            transition: 0.3s;
+            position: relative;
+            padding-bottom: 5px;
+        }
+        .nav a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+            transition: 0.3s;
+        }
+        .nav a:hover::after {
+            width: 100%;
+        }
+
+        /* 内容区域 */
+        .content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            max-width: 800px;
+            padding: 20px;
+            border-radius: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        h1 {
+            font-size: 4em;
+            margin: 0;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        /* 底部信息 */
+        .footer {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #aaa;
+            font-size: 12px;
+        }
+
+        /* Canvas 样式 */
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 导航栏 -->
+    <div class="nav">
+        <a href="#" onclick="toggleTheme()">主题切换</a>
+        <a href="#">关于</a>
+        <a href="#">作品</a>
+        <a href="#">联系</a>
+    </div>
+
+    <!-- 内容区域 -->
+    <div class="content">
+        <h1>WELCOME TO MY WORLD</h1>
+        <p>点击屏幕触发粒子爆炸！</p>
+    </div>
+
+    <!-- 底部信息 -->
+    <div class="footer">© 2024 Your Name | Powered by CSS/JS</div>
+
+    <!-- Canvas 背景 -->
+    <canvas id="backgroundCanvas"></canvas>
+
+    <script>
+        // 主题切换
+        function toggleTheme() {
+            document.body.classList.toggle('dark');
+            if (document.body.classList.contains('dark')) {
+                document.body.style.backgroundColor = '#1a1a1a';
+                document.querySelectorAll('.nav a').forEach(a => a.style.color = 'white');
+            } else {
+                document.body.style.backgroundColor = '#f0f0f0';
+                document.querySelectorAll('.nav a').forEach(a => a.style.color = '#333');
+            }
+        }
+
+        // Canvas 粒子系统
+        const canvas = document.getElementById('backgroundCanvas');
+        const ctx = canvas.getContext('2d');
+        let width = window.innerWidth;
+        let height = window.innerHeight;
+        canvas.width = width;
+        canvas.height = height;
+
+        class Particle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.size = Math.random() * 2 + 1;
+                this.speedX = (Math.random() - 0.5) * 2;
+                this.speedY = (Math.random() - 0.5) * 2;
+                this.color = `hsla(${Math.random() * 360}, 100%, 50%, 0.5)`;
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x > width || this.x < 0) this.speedX *= -1;
+                if (this.y > height || this.y < 0) this.speedY *= -1;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+        }
+
+        let particles = [];
+
+        // 初始化粒子
+        for (let i = 0; i < 200; i++) {
+            particles.push(new Particle(Math.random() * width, Math.random() * height));
+        }
+
+        // 点击触发爆炸
+        window.addEventListener('click', (e) => {
+            for (let i = 0; i < 50; i++) {
+                particles.push(new Particle(e.clientX, e.clientY));
+            }
+        });
+
+        // 动画循环
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+
+            // 绘制流体波纹
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, width, height);
+
+            // 更新并绘制粒子
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+
+        // 自适应窗口大小
+        window.addEventListener('resize', () => {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+        });
+    </script>
+</body>
+</html>
